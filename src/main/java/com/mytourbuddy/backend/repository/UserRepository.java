@@ -1,13 +1,17 @@
 package com.mytourbuddy.backend.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.mytourbuddy.backend.model.User;
 
-import java.util.List;
-import java.util.Optional;
-
 public interface UserRepository extends MongoRepository<User, String> {
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
+    Optional<User> findByUsername(String username);
+
     Optional<User> findByEmail(String email);
-    List<User> findByRole(String role);
 }
