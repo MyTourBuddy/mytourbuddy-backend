@@ -9,6 +9,5 @@ import com.mytourbuddy.backend.model.Review;
 public interface ReviewRepository extends MongoRepository<Review, String> {
 
     List<Review> findByGuideId(String guideId);
-
     List<Review> findByTouristId(String touristId);
 }
