@@ -2,11 +2,15 @@ package com.mytourbuddy.backend.controller;
 
 import com.mytourbuddy.backend.model.Experience;
 import com.mytourbuddy.backend.service.ExperienceService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/experiences")
@@ -16,30 +20,47 @@ public class ExperienceController {
     private ExperienceService service;
 
     @GetMapping
-    public List<Experience> getAllExperiences() {
-        return service.getAllExperiences();
+    public ResponseEntity<List<Experience>> getAllExperiences() {
+        List<Experience> experiences = service.getAllExperiences();
+        return ResponseEntity.ok(experiences);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Experience> getExperienceById(@PathVariable String id) {
-        return service.getExperienceById(id)
-                .map(ResponseEntity::ok)
+        Optional<Experience> experience = service.getExperienceById(id);
+        return experience.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/guides/{guideId}")
+    public ResponseEntity<List<Experience>> getExperiencesByGuideId(@PathVariable String guideId) {
+        List<Experience> experiences = service.getExperiencesByGuideId(guideId);
+        return ResponseEntity.ok(experiences);
+    }
+
     @PostMapping
-    public Experience createExperience(@RequestBody Experience experience) {
-        return service.createExperience(experience);
+    public ResponseEntity<Experience> createExperience(@Valid @RequestBody Experience experience) {
+        Experience created = service.createExperience(experience);
+        return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
-    public Experience updateExperience(@PathVariable String id, @RequestBody Experience experience) {
-        return service.updateExperience(id, experience);
+    public ResponseEntity<Experience> updateExperience(@PathVariable String id, @RequestBody Experience experience) {
+        try {
+            Experience updated = service.updateExperience(id, experience);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExperience(@PathVariable String id) {
-        service.deleteExperience(id);
-        return ResponseEntity.noContent().build();
+        try {
+            service.deleteExperience(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
