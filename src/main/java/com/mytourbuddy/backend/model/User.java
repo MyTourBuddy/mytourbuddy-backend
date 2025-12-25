@@ -51,12 +51,8 @@ public class User {
     private String bio;
     private List<String> specializations;
     private String certifications;
-    private Double dailyRate;
-    private Integer maxGroupSize;
-    private String transportMode;
-    private List<String> ageGroups;
-    private List<String> workingDays;
     private String emergencyContact;
     private String website;
     private List<String> socialMedia;
+    private Boolean isVerified;
 }
