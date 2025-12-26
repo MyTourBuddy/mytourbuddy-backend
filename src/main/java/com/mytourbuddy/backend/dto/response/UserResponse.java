@@ -1,5 +1,6 @@
 package com.mytourbuddy.backend.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mytourbuddy.backend.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +12,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
+// todo: update with roles
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class UserResponse {
     private String id;
     private Role role;

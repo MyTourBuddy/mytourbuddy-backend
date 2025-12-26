@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateProfileRequest {
+public class UpdateRequest {
 
     @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
     private String firstName;

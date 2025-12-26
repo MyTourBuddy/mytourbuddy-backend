@@ -1,21 +1,19 @@
 package com.mytourbuddy.backend.service;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mytourbuddy.backend.dto.request.RegisterRequest;
+import com.mytourbuddy.backend.dto.request.UpdateRequest;
+import com.mytourbuddy.backend.dto.response.UserResponse;
+import com.mytourbuddy.backend.mapper.UserMapper;
 import com.mytourbuddy.backend.model.Role;
 import com.mytourbuddy.backend.model.User;
 import com.mytourbuddy.backend.repository.UserRepository;
 
-import java.beans.PropertyDescriptor;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,121 +21,194 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserMapper userMapper;
+
     // get all users
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    // public List<User> getAllUsers() {
+    // return userRepository.findAll();
+    // }
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream().map(userMapper::toResponse).collect(Collectors.toList());
     }
 
     // get user by id
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
+    // public Optional<User> getUserById(String id) {
+    // return userRepository.findById(id);
+    // }
+    public UserResponse getUserById(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        return userMapper.toResponse(user);
     }
 
     // create user
-    public User createUser(User user) {
-        if (userRepository.existsByUsername(user.getUsername())) {
+    // public User createUser(User user) {
+    // if (userRepository.existsByUsername(user.getUsername())) {
+    // throw new IllegalArgumentException("Username already exists");
+    // }
+
+    // if (userRepository.existsByEmail(user.getEmail())) {
+    // throw new IllegalArgumentException("Email already exists");
+    // }
+
+    // if (!checkProfile(user)) {
+    // throw new IllegalArgumentException("All fields are required and must not be
+    // empty.");
+    // }
+
+    // user.setIsProfileComplete(false);
+    // user.setMemberSince(Instant.now());
+
+    // return userRepository.save(user);
+    // }
+    public UserResponse createUser(RegisterRequest request) {
+        // check username and password already exists
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
 
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        if (!checkProfile(user)) {
-            throw new IllegalArgumentException("All fields are required and must not be empty.");
-        }
+        // validate role specific fields
+        validateRoleSpecificFields(request);
+
+        User user = userMapper.toEntity(request);
+
+        // todo: encrypt password before store in db
 
         user.setIsProfileComplete(false);
         user.setMemberSince(Instant.now());
 
-        return userRepository.save(user);
+        if (request.getRole() == Role.GUIDE) {
+            user.setIsVerified(false);
+        }
+
+        User savedUser = userRepository.save(user);
+
+        return userMapper.toResponse(savedUser);
     }
 
     // update user details
-    public User updateUser(User updatedUser) {
-        User existingUser = userRepository.findById(updatedUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    // public User updateUser(User updatedUser) {
+    // User existingUser = userRepository.findById(updatedUser.getId())
+    // .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (updatedUser.getRole() != null && !updatedUser.getRole().equals(existingUser.getRole())) {
-            throw new IllegalArgumentException("Cannot update role");
-        }
-        if (updatedUser.getUsername() != null && !updatedUser.getUsername().equals(existingUser.getUsername())) {
-            throw new IllegalArgumentException("Cannot update username");
-        }
-        if (updatedUser.getEmail() != null && !updatedUser.getEmail().equals(existingUser.getEmail())) {
-            throw new IllegalArgumentException("Cannot update email");
-        }
+    // if (updatedUser.getRole() != null &&
+    // !updatedUser.getRole().equals(existingUser.getRole())) {
+    // throw new IllegalArgumentException("Cannot update role");
+    // }
+    // if (updatedUser.getUsername() != null &&
+    // !updatedUser.getUsername().equals(existingUser.getUsername())) {
+    // throw new IllegalArgumentException("Cannot update username");
+    // }
+    // if (updatedUser.getEmail() != null &&
+    // !updatedUser.getEmail().equals(existingUser.getEmail())) {
+    // throw new IllegalArgumentException("Cannot update email");
+    // }
 
-        copyNonNullProperties(updatedUser, existingUser);
+    // copyNonNullProperties(updatedUser, existingUser);
 
-        return userRepository.save(existingUser);
+    // return userRepository.save(existingUser);
+    // }
+    public UserResponse updateUser(String id, UpdateRequest request) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+
+        userMapper.updateEntityFromRequest(request, existingUser);
+
+        User updatedUser = userRepository.save(existingUser);
+
+        return userMapper.toResponse(updatedUser);
     }
 
     // delete user by id
-    public void deleteUserById(String id) {
+    public void deleteUser(String id) {
         if (!userRepository.existsById(id)) {
             throw new IllegalArgumentException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
     }
 
+    // validate role specific fields
+    private void validateRoleSpecificFields(RegisterRequest request){
+        if (request.getRole() == Role.TOURIST) {
+            if (request.getCountry() == null || request.getCountry().isEmpty()) {
+                throw new IllegalArgumentException("Country is required for tourists");
+            }
+            if (request.getTravelPreferences() == null || request.getTravelPreferences().isEmpty()) {
+                throw new IllegalArgumentException("Travel preferences are required for tourists");
+            }
+        }
+
+        if (request.getRole() == Role.GUIDE) {
+            if (request.getLanguages() == null || request.getLanguages().isEmpty()) {
+                throw new IllegalArgumentException("Languages are required for guides");
+            }
+            if (request.getYearsOfExp() == null || request.getYearsOfExp() < 0) {
+                throw new IllegalArgumentException("Years of experience is required for guides");
+            }
+        }
+    }
 
     // copy non null properties from source(data from frontend) to target
-    private void copyNonNullProperties(Object source, Object target) {
-        BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
-    }
+    // private void copyNonNullProperties(Object source, Object target) {
+    // BeanUtils.copyProperties(source, target, getNullPropertyNames(source));
+    // }
 
-    private String[] getNullPropertyNames(Object source) {
-        final BeanWrapper src = new BeanWrapperImpl(source);
-        PropertyDescriptor[] pds = src.getPropertyDescriptors();
+    // private String[] getNullPropertyNames(Object source) {
+    // final BeanWrapper src = new BeanWrapperImpl(source);
+    // PropertyDescriptor[] pds = src.getPropertyDescriptors();
 
-        Set<String> emptyNames = new HashSet<>();
-        for (PropertyDescriptor pd : pds) {
-            Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null)
-                emptyNames.add(pd.getName());
-        }
+    // Set<String> emptyNames = new HashSet<>();
+    // for (PropertyDescriptor pd : pds) {
+    // Object srcValue = src.getPropertyValue(pd.getName());
+    // if (srcValue == null)
+    // emptyNames.add(pd.getName());
+    // }
 
-        emptyNames.add("id");
-        emptyNames.add("role");
-        emptyNames.add("username");
-        emptyNames.add("email");
-        emptyNames.add("memberSince");
+    // emptyNames.add("id");
+    // emptyNames.add("role");
+    // emptyNames.add("username");
+    // emptyNames.add("email");
+    // emptyNames.add("memberSince");
 
-        return emptyNames.toArray(new String[0]);
-    }
+    // return emptyNames.toArray(new String[0]);
+    // }
 
     // verify user before create
-    private boolean checkProfile(User user) {
-        // common
-        if (user.getFirstName() == null || user.getFirstName().isEmpty())
-            return false;
-        if (user.getLastName() == null || user.getLastName().isEmpty())
-            return false;
-        if (user.getEmail() == null || user.getEmail().isEmpty())
-            return false;
-        if (user.getAge() == null || user.getAge() < 1 || user.getAge() > 150)
-            return false;
-        if (user.getUsername() == null || user.getUsername().isEmpty())
-            return false;
-        if (user.getPassword() == null || user.getPassword().isEmpty())
-            return false;
+    // private boolean checkProfile(User user) {
+    // // common
+    // if (user.getFirstName() == null || user.getFirstName().isEmpty())
+    // return false;
+    // if (user.getLastName() == null || user.getLastName().isEmpty())
+    // return false;
+    // if (user.getEmail() == null || user.getEmail().isEmpty())
+    // return false;
+    // if (user.getAge() == null || user.getAge() < 1 || user.getAge() > 150)
+    // return false;
+    // if (user.getUsername() == null || user.getUsername().isEmpty())
+    // return false;
+    // if (user.getPassword() == null || user.getPassword().isEmpty())
+    // return false;
 
-        if (user.getRole() == Role.TOURIST) {
-            return user.getCountry() != null && !user.getCountry().isEmpty()
-                    && user.getTravelPreferences() != null
-                    && !user.getTravelPreferences().isEmpty();
-        }
+    // if (user.getRole() == Role.TOURIST) {
+    // return user.getCountry() != null && !user.getCountry().isEmpty()
+    // && user.getTravelPreferences() != null
+    // && !user.getTravelPreferences().isEmpty();
+    // }
 
-        if (user.getRole() == Role.GUIDE) {
-            return user.getLanguages() != null
-                    && !user.getLanguages().isEmpty()
-                    && user.getYearsOfExp() != null
-                    && user.getYearsOfExp() >= 0;
-        }
+    // if (user.getRole() == Role.GUIDE) {
+    // return user.getLanguages() != null
+    // && !user.getLanguages().isEmpty()
+    // && user.getYearsOfExp() != null
+    // && user.getYearsOfExp() >= 0;
+    // }
 
-        return user.getRole() == Role.ADMIN;
-    }
+    // return user.getRole() == Role.ADMIN;
+    // }
 
     // todo - for profile completion bar
     // public boolean checkIsProfileComplete(User user) {
