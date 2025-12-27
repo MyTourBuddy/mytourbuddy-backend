@@ -1,6 +1,8 @@
 package com.mytourbuddy.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +27,8 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // get all users
     // public List<User> getAllUsers() {
@@ -81,9 +83,7 @@ public class UserService {
 
         User user = userMapper.toEntity(request);
 
-        // todo: encrypt password before store in db
-
-//        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setIsProfileComplete(false);
         user.setMemberSince(Instant.now());
@@ -123,6 +123,8 @@ public class UserService {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
 
+        checkUpdateAuthorization(existingUser);
+
         userMapper.updateEntityFromRequest(request, existingUser);
 
         User updatedUser = userRepository.save(existingUser);
@@ -139,7 +141,7 @@ public class UserService {
     }
 
     // validate role specific fields
-    private void validateRoleSpecificFields(RegisterRequest request){
+    private void validateRoleSpecificFields(RegisterRequest request) {
         if (request.getRole() == Role.TOURIST) {
             if (request.getCountry() == null || request.getCountry().isEmpty()) {
                 throw new IllegalArgumentException("Country is required for tourists");
@@ -156,6 +158,19 @@ public class UserService {
             if (request.getYearsOfExp() == null || request.getYearsOfExp() < 0) {
                 throw new IllegalArgumentException("Years of experience is required for guides");
             }
+        }
+    }
+
+    // allow update user if admin or logged user
+    private void checkUpdateAuthorization(User userToUpdate) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !userToUpdate.getUsername().equals(currentUsername)) {
+            throw new SecurityException("You are not authorized to update this profile");
         }
     }
 

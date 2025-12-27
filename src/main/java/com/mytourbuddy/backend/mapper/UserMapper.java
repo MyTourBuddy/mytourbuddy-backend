@@ -16,6 +16,7 @@ public class UserMapper {
     public User toEntity(RegisterRequest request) {
         User user = new User();
 
+        user.setRole(request.getRole());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
@@ -36,8 +37,6 @@ public class UserMapper {
 
     // to response user
     public UserResponse toResponse(User user) {
-        System.out.println("Mapping user with role: " + user.getRole());
-
         if (user.getRole() == Role.GUIDE) {
             return toGuideResponse(user);
         } else if (user.getRole() == Role.TOURIST) {
