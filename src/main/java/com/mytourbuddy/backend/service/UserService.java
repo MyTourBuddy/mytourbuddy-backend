@@ -1,6 +1,7 @@
 package com.mytourbuddy.backend.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.mytourbuddy.backend.dto.request.RegisterRequest;
@@ -23,6 +24,9 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     // get all users
     // public List<User> getAllUsers() {
@@ -78,6 +82,8 @@ public class UserService {
         User user = userMapper.toEntity(request);
 
         // todo: encrypt password before store in db
+
+//        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         user.setIsProfileComplete(false);
         user.setMemberSince(Instant.now());
