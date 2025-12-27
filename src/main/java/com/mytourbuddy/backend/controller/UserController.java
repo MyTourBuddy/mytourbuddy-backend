@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import com.mytourbuddy.backend.dto.request.RegisterRequest;
 import com.mytourbuddy.backend.dto.request.UpdateRequest;
 import com.mytourbuddy.backend.dto.response.UserResponse;
-import com.mytourbuddy.backend.model.User;
 import com.mytourbuddy.backend.service.UserService;
 
 import jakarta.validation.Valid;

@@ -4,7 +4,10 @@ import org.springframework.stereotype.Component;
 
 import com.mytourbuddy.backend.dto.request.RegisterRequest;
 import com.mytourbuddy.backend.dto.request.UpdateRequest;
+import com.mytourbuddy.backend.dto.response.GuideResponse;
+import com.mytourbuddy.backend.dto.response.TouristResponse;
 import com.mytourbuddy.backend.dto.response.UserResponse;
+import com.mytourbuddy.backend.model.Role;
 import com.mytourbuddy.backend.model.User;
 
 @Component
@@ -33,29 +36,22 @@ public class UserMapper {
 
     // to response user
     public UserResponse toResponse(User user) {
-        UserResponse response = new UserResponse();
+        System.out.println("Mapping user with role: " + user.getRole());
 
-        response.setId(user.getId());
-        response.setRole(user.getRole());
+        if (user.getRole() == Role.GUIDE) {
+            return toGuideResponse(user);
+        } else if (user.getRole() == Role.TOURIST) {
+            return toTouristResponse(user);
+        } else {
+            return toBaseResponse(user);
+        }
+    }
 
-        response.setFirstName(user.getFirstName());
-        response.setLastName(user.getLastName());
-        response.setEmail(user.getEmail());
-        response.setAge(user.getAge());
-        response.setUsername(user.getUsername());
-        response.setAvatar(user.getAvatar());
-        response.setPhone(user.getPhone());
-        response.setIsProfileComplete(user.getIsProfileComplete());
-        response.setMemberSince(user.getMemberSince());
+    private GuideResponse toGuideResponse(User user) {
+        GuideResponse response = new GuideResponse();
 
-        // tourist only
-        response.setCountry(user.getCountry());
-        response.setTravelPreferences(user.getTravelPreferences());
-        response.setPreferredDestinations(user.getPreferredDestinations());
-        response.setTravelInterests(user.getTravelInterests());
-        response.setLanguageSpoken(user.getLanguageSpoken());
+        setCommonFields(response, user);
 
-        // guide only
         response.setLanguages(user.getLanguages());
         response.setYearsOfExp(user.getYearsOfExp());
         response.setBio(user.getBio());
@@ -68,6 +64,77 @@ public class UserMapper {
 
         return response;
     }
+
+    private TouristResponse toTouristResponse(User user) {
+        TouristResponse response = new TouristResponse();
+
+        setCommonFields(response, user);
+
+        response.setCountry(user.getCountry());
+        response.setTravelPreferences(user.getTravelPreferences());
+        response.setPreferredDestinations(user.getPreferredDestinations());
+        response.setTravelInterests(user.getTravelInterests());
+        response.setLanguageSpoken(user.getLanguageSpoken());
+
+        return response;
+    }
+
+    private UserResponse toBaseResponse(User user) {
+        UserResponse response = new UserResponse();
+        setCommonFields(response, user);
+        return response;
+    }
+
+    private void setCommonFields(UserResponse response, User user) {
+        response.setId(user.getId());
+        response.setRole(user.getRole());
+        response.setFirstName(user.getFirstName());
+        response.setLastName(user.getLastName());
+        response.setEmail(user.getEmail());
+        response.setUsername(user.getUsername());
+        response.setAge(user.getAge());
+        response.setAvatar(user.getAvatar());
+        response.setPhone(user.getPhone());
+        response.setIsProfileComplete(user.getIsProfileComplete());
+        response.setMemberSince(user.getMemberSince());
+    }
+
+    // public UserResponse toResponse(User user) {
+    // UserResponse response = new UserResponse();
+
+    // response.setId(user.getId());
+    // response.setRole(user.getRole());
+
+    // response.setFirstName(user.getFirstName());
+    // response.setLastName(user.getLastName());
+    // response.setEmail(user.getEmail());
+    // response.setAge(user.getAge());
+    // response.setUsername(user.getUsername());
+    // response.setAvatar(user.getAvatar());
+    // response.setPhone(user.getPhone());
+    // response.setIsProfileComplete(user.getIsProfileComplete());
+    // response.setMemberSince(user.getMemberSince());
+
+    // // tourist only
+    // response.setCountry(user.getCountry());
+    // response.setTravelPreferences(user.getTravelPreferences());
+    // response.setPreferredDestinations(user.getPreferredDestinations());
+    // response.setTravelInterests(user.getTravelInterests());
+    // response.setLanguageSpoken(user.getLanguageSpoken());
+
+    // // guide only
+    // response.setLanguages(user.getLanguages());
+    // response.setYearsOfExp(user.getYearsOfExp());
+    // response.setBio(user.getBio());
+    // response.setSpecializations(user.getSpecializations());
+    // response.setCertifications(user.getCertifications());
+    // response.setEmergencyContact(user.getEmergencyContact());
+    // response.setWebsite(user.getWebsite());
+    // response.setSocialMedia(user.getSocialMedia());
+    // response.setIsVerified(user.getIsVerified());
+
+    // return response;
+    // }
 
     // to update user
     public void updateEntityFromRequest(UpdateRequest request, User user) {
