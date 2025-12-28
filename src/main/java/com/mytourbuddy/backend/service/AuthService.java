@@ -81,7 +81,12 @@ public class AuthService {
 
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-                user.setIsProfileComplete(false);
+                if (request.getRole() == Role.ADMIN) {
+                        user.setIsProfileComplete(true);
+                } else {
+                        user.setIsProfileComplete(false);
+                }
+
                 user.setMemberSince(Instant.now());
 
                 if (request.getRole() == Role.GUIDE) {
@@ -94,13 +99,41 @@ public class AuthService {
 
                 UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                                 .username(savedUser.getUsername())
-                                .password(savedUser.getPassword()) // Already hashed
+                                .password(savedUser.getPassword())
                                 .authorities("ROLE_" + savedUser.getRole().name())
                                 .build();
 
                 String token = jwtUtil.generateToken(userDetails);
 
                 return new AuthResponse(token, userResponse);
+        }
+
+        public UserResponse getUserFromToken(String token) {
+                try {
+                        String username = jwtUtil.extractUsername(token);
+
+                        if (username == null) {
+                                throw new IllegalArgumentException("Invalid token");
+                        }
+
+                        // Validate token is not expired
+                        User user = userRepository.findByUsername(username)
+                                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+                        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                                        .username(user.getUsername())
+                                        .password(user.getPassword())
+                                        .authorities("ROLE_" + user.getRole().name())
+                                        .build();
+
+                        if (!jwtUtil.isTokenValid(token, userDetails)) {
+                                throw new IllegalArgumentException("Token is invalid or expired");
+                        }
+
+                        return userMapper.toResponse(user);
+                } catch (Exception e) {
+                        throw new IllegalArgumentException("Invalid or expired token");
+                }
         }
 
         private void validateRoleSpecificFields(RegisterRequest request) {
