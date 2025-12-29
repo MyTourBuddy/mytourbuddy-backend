@@ -30,7 +30,8 @@ public class CorsConfig {
         config.setAllowedHeaders(Arrays.asList("*"));
 
         // Allow specific methods
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        config.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         // Expose headers (if needed)
         // config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
