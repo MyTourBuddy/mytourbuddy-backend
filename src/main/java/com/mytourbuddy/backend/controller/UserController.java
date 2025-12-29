@@ -23,7 +23,11 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers(@RequestParam(required = false) String username) {
+        if (username != null && !username.trim().isEmpty()) {
+            UserResponse user = userService.getUserByUsername(username.trim());
+            return ResponseEntity.ok(user);
+        }
         List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }

@@ -48,6 +48,13 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    // get user by username
+    public UserResponse getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + username));
+        return userMapper.toResponse(user);
+    }
+
     // create user
     // public User createUser(User user) {
     // if (userRepository.existsByUsername(user.getUsername())) {
