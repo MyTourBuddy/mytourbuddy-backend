@@ -14,7 +14,5 @@ import lombok.NoArgsConstructor;
 public class TouristResponse extends UserResponse {
     private String country;
     private List<String> travelPreferences;
-    private List<String> preferredDestinations;
-    private List<String> travelInterests;
-    private List<String> languageSpoken;
+    private List<String> languagesSpoken;
 }
