@@ -2,7 +2,10 @@ package com.mytourbuddy.backend.dto.request;
 
 import java.util.List;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,7 +35,7 @@ public class UpdateRequest {
     private List<String> travelPreferences;
     private List<String> preferredDestinations;
     private List<String> travelInterests;
-    private List<String> languageSpoken;
+    private List<String> languagesSpoken;
 
     // guide only
     private List<String> languages;
@@ -44,7 +47,7 @@ public class UpdateRequest {
     private String bio;
 
     private List<String> specializations;
-    private String certifications;
+    private List<String> certifications;
     private String emergencyContact;
     private String website;
     private List<String> socialMedia;

@@ -30,7 +30,7 @@ public class User {
 
     @Indexed(unique = true)
     private String username;
-    
+
     private String password;
     private Integer age;
     private String avatar;
@@ -41,16 +41,14 @@ public class User {
     // tourist only
     private String country;
     private List<String> travelPreferences;
-    private List<String> preferredDestinations;
-    private List<String> travelInterests;
-    private List<String> languageSpoken;
+    private List<String> languagesSpoken;
 
     // guide only
     private List<String> languages;
     private Integer yearsOfExp;
     private String bio;
     private List<String> specializations;
-    private String certifications;
+    private List<String> certifications;
     private String emergencyContact;
     private String website;
     private List<String> socialMedia;

@@ -16,7 +16,7 @@ public class GuideResponse extends UserResponse {
     private Integer yearsOfExp;
     private String bio;
     private List<String> specializations;
-    private String certifications;
+    private List<String> certifications;
     private String emergencyContact;
     private String website;
     private List<String> socialMedia;
