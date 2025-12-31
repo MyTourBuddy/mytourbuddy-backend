@@ -1,15 +1,5 @@
 package com.mytourbuddy.backend.controller;
 
-import com.mytourbuddy.backend.dto.request.LoginRequest;
-import com.mytourbuddy.backend.dto.request.RegisterRequest;
-import com.mytourbuddy.backend.dto.response.AuthResponse;
-import com.mytourbuddy.backend.dto.response.UserResponse;
-import com.mytourbuddy.backend.service.AuthService;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +12,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.mytourbuddy.backend.dto.request.LoginRequest;
+import com.mytourbuddy.backend.dto.request.RegisterRequest;
+import com.mytourbuddy.backend.dto.response.AuthResponse;
+import com.mytourbuddy.backend.dto.response.UserResponse;
+import com.mytourbuddy.backend.repository.UserRepository;
+import com.mytourbuddy.backend.service.AuthService;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -39,6 +41,9 @@ public class AuthController {
 
     @Value("${jwt.cookie.secure}")
     private boolean cookieSecure;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private Cookie createJwtCookie(String token) {
         Cookie cookie = new Cookie(cookieName, token);
@@ -62,15 +67,21 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request,
             HttpServletResponse response) {
-        AuthResponse authResponse = authService.register(request);
+        try {
+            AuthResponse authResponse = authService.register(request);
 
-        Cookie jwtCookie = createJwtCookie(authResponse.getToken());
-        response.addCookie(jwtCookie);
+            Cookie jwtCookie = createJwtCookie(authResponse.getToken());
+            response.addCookie(jwtCookie);
 
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("user", authResponse.getUser());
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("user", authResponse.getUser());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
     }
 
     // login user
@@ -116,6 +127,34 @@ public class AuthController {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("message", "Logged out successfully");
         return ResponseEntity.ok(responseBody);
+    }
+
+    // check username availability
+    @GetMapping("/check-username")
+    public ResponseEntity<Map<String, String>> checkUsername(@RequestParam String username) {
+        boolean exists = userRepository.existsByUsername(username);
+        Map<String, String> response = new HashMap<>();
+        if (exists) {
+            response.put("message", "Username is already taken");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } else {
+            response.put("message", "Username is available");
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    // check email availability
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, String>> checkEmail(@RequestParam String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        Map<String, String> response = new HashMap<>();
+        if (exists) {
+            response.put("message", "Email is already taken");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        } else {
+            response.put("message", "Email is available");
+            return ResponseEntity.ok(response);
+        }
     }
 
     // health check

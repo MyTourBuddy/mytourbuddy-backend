@@ -1,15 +1,5 @@
 package com.mytourbuddy.backend.service;
 
-import com.mytourbuddy.backend.dto.request.LoginRequest;
-import com.mytourbuddy.backend.dto.request.RegisterRequest;
-import com.mytourbuddy.backend.dto.response.AuthResponse;
-import com.mytourbuddy.backend.dto.response.UserResponse;
-import com.mytourbuddy.backend.mapper.UserMapper;
-import com.mytourbuddy.backend.model.Role;
-import com.mytourbuddy.backend.model.User;
-import com.mytourbuddy.backend.repository.UserRepository;
-import com.mytourbuddy.backend.security.JwtUtil;
-
 import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +10,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.mytourbuddy.backend.dto.request.LoginRequest;
+import com.mytourbuddy.backend.dto.request.RegisterRequest;
+import com.mytourbuddy.backend.dto.response.AuthResponse;
+import com.mytourbuddy.backend.dto.response.UserResponse;
+import com.mytourbuddy.backend.mapper.UserMapper;
+import com.mytourbuddy.backend.model.Role;
+import com.mytourbuddy.backend.model.User;
+import com.mytourbuddy.backend.repository.UserRepository;
+import com.mytourbuddy.backend.security.JwtUtil;
 
 @Service
 public class AuthService {
