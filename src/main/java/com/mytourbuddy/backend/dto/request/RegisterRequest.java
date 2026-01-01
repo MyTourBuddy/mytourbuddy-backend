@@ -1,12 +1,19 @@
 package com.mytourbuddy.backend.dto.request;
 
+import java.util.List;
+
 import com.mytourbuddy.backend.model.Role;
-import jakarta.validation.constraints.*;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +36,7 @@ public class RegisterRequest {
     private String email;
 
     @NotNull(message = "Age is required")
-    @Min(value = 18, message = "Must be at least 18 years old")
+    @Min(value = 12, message = "Must be at least 12 years old")
     @Max(value = 150, message = "Age must be realistic")
     private Integer age;
 

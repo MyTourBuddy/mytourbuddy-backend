@@ -131,30 +131,22 @@ public class AuthController {
 
     // check username availability
     @GetMapping("/check-username")
-    public ResponseEntity<Map<String, String>> checkUsername(@RequestParam String username) {
+    public ResponseEntity<Map<String, Object>> checkUsername(@RequestParam String username) {
         boolean exists = userRepository.existsByUsername(username);
-        Map<String, String> response = new HashMap<>();
-        if (exists) {
-            response.put("message", "Username is already taken");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } else {
-            response.put("message", "Username is available");
-            return ResponseEntity.ok(response);
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("available", !exists);
+        response.put("message", exists ? "Username is already taken" : "Username is available");
+        return ResponseEntity.ok(response);
     }
 
     // check email availability
     @GetMapping("/check-email")
-    public ResponseEntity<Map<String, String>> checkEmail(@RequestParam String email) {
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email) {
         boolean exists = userRepository.existsByEmail(email);
-        Map<String, String> response = new HashMap<>();
-        if (exists) {
-            response.put("message", "Email is already taken");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
-        } else {
-            response.put("message", "Email is available");
-            return ResponseEntity.ok(response);
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("available", !exists);
+        response.put("message", exists ? "Email is already taken" : "Email is available");
+        return ResponseEntity.ok(response);
     }
 
     // health check
