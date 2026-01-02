@@ -43,10 +43,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
 
                         // admin only
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
+
+                        // guide only for package management
+                        .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/packages/**").hasRole("GUIDE")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
