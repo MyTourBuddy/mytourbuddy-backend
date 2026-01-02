@@ -21,6 +21,8 @@ import com.mytourbuddy.backend.model.User;
 import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.security.JwtUtil;
 
+import io.jsonwebtoken.JwtException;
+
 @Service
 public class AuthService {
         @Autowired
@@ -37,10 +39,6 @@ public class AuthService {
 
         @Autowired
         private PasswordEncoder passwordEncoder;
-
-        AuthService(PasswordEncoder passwordEncoder) {
-                this.passwordEncoder = passwordEncoder;
-        }
 
         // login user
         public AuthResponse login(LoginRequest request) {
@@ -131,7 +129,7 @@ public class AuthService {
                         }
 
                         return userMapper.toResponse(user);
-                } catch (Exception e) {
+                } catch (IllegalArgumentException | JwtException e) {
                         throw new IllegalArgumentException("Invalid or expired token");
                 }
         }
