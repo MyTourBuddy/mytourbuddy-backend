@@ -1,20 +1,21 @@
 package com.mytourbuddy.backend.service;
 
-import com.mytourbuddy.backend.model.Package;
-import com.mytourbuddy.backend.model.PackageStatus;
-import com.mytourbuddy.backend.repository.PackageRepository;
-import com.mytourbuddy.backend.repository.UserRepository;
+import java.beans.PropertyDescriptor;
+import java.security.SecureRandom;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.beans.PropertyDescriptor;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import com.mytourbuddy.backend.model.Package;
+import com.mytourbuddy.backend.model.PackageStatus;
+import com.mytourbuddy.backend.repository.PackageRepository;
+import com.mytourbuddy.backend.repository.UserRepository;
 
 @Service
 public class PackageService {
@@ -26,6 +27,10 @@ public class PackageService {
     private UserRepository userRepository;
 
     private static final Set<String> IMMUTABLE_FIELDS = Set.of("id", "guideId", "createdAt");
+    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int ID_LENGTH = 6;
+    private static final String ID_PREFIX = "pkg";
+    private static final SecureRandom random = new SecureRandom();
 
     // get all packages
     public List<Package> getAllPackages() {
@@ -53,9 +58,32 @@ public class PackageService {
             throw new IllegalArgumentException("Guide with id " + pkg.getGuideId() + " not found");
         }
 
+        pkg.setId(generatePackageId());
         pkg.setStatus(PackageStatus.ACTIVE);
         pkg.setCreatedAt(Instant.now());
         return packageRepository.save(pkg);
+    }
+
+    private String generatePackageId() {
+        String packageId;
+        int maxAttempts = 10;
+        int attempts = 0;
+
+        do {
+            StringBuilder sb = new StringBuilder(ID_PREFIX);
+            for (int i = 0; i < ID_LENGTH; i++) {
+                int index = random.nextInt(CHARACTERS.length());
+                sb.append(CHARACTERS.charAt(index));
+            }
+            packageId = sb.toString();
+            attempts++;
+
+            if (attempts >= maxAttempts) {
+                throw new RuntimeException("Failed to generate unique package ID after " + maxAttempts + " attempts");
+            }
+        } while (packageRepository.existsById(packageId));
+
+        return packageId;
     }
 
     // update package
