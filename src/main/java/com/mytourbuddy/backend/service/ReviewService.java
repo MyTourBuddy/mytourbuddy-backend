@@ -109,9 +109,6 @@ public class ReviewService {
                 .filter(rating -> rating >= 1 && rating <= 5)
                 .ifPresent(existingReview::setRating);
 
-        Optional.ofNullable(updatedReview.getImage())
-                .ifPresent(existingReview::setImage);
-
         return reviewRepository.save(existingReview);
     }
 

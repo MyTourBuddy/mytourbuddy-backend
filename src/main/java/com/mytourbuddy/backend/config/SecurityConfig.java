@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/packages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/experiences/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
 
                         // admin only
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
@@ -54,10 +55,13 @@ public class SecurityConfig {
                         // guide only for package management
                         .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**").hasRole("GUIDE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/packages/**").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/packages/**").hasAnyRole("GUIDE", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/experiences").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/experiences/**").hasRole("GUIDE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/experiences/**").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/experiences/**").hasAnyRole("GUIDE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/reviews").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/**").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").hasAnyRole("TOURIST", "ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
