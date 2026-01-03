@@ -1,5 +1,6 @@
 package com.mytourbuddy.backend.service;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,11 @@ public class ReviewService {
     @Autowired
     private UserRepository userRepository;
 
+    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int ID_LENGTH = 6;
+    private static final String ID_PREFIX = "rev";
+    private static final SecureRandom random = new SecureRandom();
+
     // create review
     public Review createReview(Review review) {
         if (review == null) {
@@ -27,8 +33,31 @@ public class ReviewService {
         }
 
         verifyProfilesExist(review);
+        review.setId(generateReviewId());
         review.setCreatedAt(Instant.now());
         return reviewRepository.save(review);
+    }
+
+    private String generateReviewId() {
+        String reviewId;
+        int maxAttempts = 10;
+        int attempts = 0;
+
+        do {
+            StringBuilder sb = new StringBuilder(ID_PREFIX);
+            for (int i = 0; i < ID_LENGTH; i++) {
+                int index = random.nextInt(CHARACTERS.length());
+                sb.append(CHARACTERS.charAt(index));
+            }
+            reviewId = sb.toString();
+            attempts++;
+
+            if (attempts >= maxAttempts) {
+                throw new RuntimeException("Failed to generate unique review ID after " + maxAttempts + " attempts");
+            }
+        } while (reviewRepository.existsById(reviewId));
+
+        return reviewId;
     }
 
     public boolean verifyProfilesExist(Review review) {
@@ -79,9 +108,6 @@ public class ReviewService {
         Optional.ofNullable(updatedReview.getRating())
                 .filter(rating -> rating >= 1 && rating <= 5)
                 .ifPresent(existingReview::setRating);
-
-        Optional.ofNullable(updatedReview.getImage())
-                .ifPresent(existingReview::setImage);
 
         return reviewRepository.save(existingReview);
     }
