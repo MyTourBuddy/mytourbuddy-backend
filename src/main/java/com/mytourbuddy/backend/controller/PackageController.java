@@ -1,16 +1,24 @@
 package com.mytourbuddy.backend.controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.mytourbuddy.backend.model.Package;
 import com.mytourbuddy.backend.service.PackageService;
 
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/packages")
@@ -36,6 +44,14 @@ public class PackageController {
     public ResponseEntity<List<Package>> getPackagesByGuideId(@PathVariable String guideId) {
         List<Package> packages = service.getPackagesByGuideId(guideId);
         return ResponseEntity.ok(packages);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Package>> searchPackages(@RequestParam(required = false) String q) {
+        if (q != null && !q.isEmpty()) {
+            return ResponseEntity.ok(service.searchPackages(q));
+        }
+        return ResponseEntity.ok(service.getAllPackages());
     }
 
     @PostMapping
