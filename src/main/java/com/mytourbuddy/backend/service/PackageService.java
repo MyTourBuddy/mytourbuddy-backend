@@ -47,6 +47,11 @@ public class PackageService {
         return packageRepository.findByGuideId(guideId);
     }
 
+    // search packages by title or location
+    public List<Package> searchPackages(String query) {
+        return packageRepository.findByTitleContainingIgnoreCaseOrLocationContainingIgnoreCase(query, query);
+    }
+
     // create package
     public Package createPackage(Package pkg) {
         if (pkg == null) {
