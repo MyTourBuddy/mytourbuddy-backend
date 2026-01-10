@@ -1,9 +1,8 @@
-package com.mytourbuddy.backend.model;
+package com.mytourbuddy.backend.dto.response;
 
 import java.time.Instant;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.mytourbuddy.backend.model.BookingStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,17 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "bookings")
-public class Booking {
-    @Id
+public class BookingResponse {
     private String id;
-
     private String touristId;
     private String pkgId;
-
     private Double totalPrice;
-
     private BookingStatus bookingStatus;
-
     private Instant createdAt;
 }
