@@ -13,6 +13,7 @@ public class BookingMapper {
         Booking booking = new Booking();
         booking.setPkgId(request.getPkgId());
         booking.setTotalPrice(request.getTotalPrice());
+        booking.setTotalCount(request.getTotalCount());
         booking.setBookingDate(request.getBookingDate());
         booking.setTouristId(touristId);
         return booking;
@@ -24,6 +25,7 @@ public class BookingMapper {
         response.setTouristId(booking.getTouristId());
         response.setPkgId(booking.getPkgId());
         response.setTotalPrice(booking.getTotalPrice());
+        response.setTotalCount(booking.getTotalCount());
         response.setBookingStatus(booking.getBookingStatus());
         response.setCreatedAt(booking.getCreatedAt());
         return response;

@@ -27,6 +27,12 @@ public class BookingController {
     @Autowired
     private BookingService bookingService;
 
+    @GetMapping
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        List<Booking> bookings = bookingService.getAllBookings();
+        return ResponseEntity.ok(bookings);
+    }
+
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
         String userId = SecurityContextHolder.getContext()
@@ -36,7 +42,7 @@ public class BookingController {
         return ResponseEntity.ok(created);
     }
 
-    @GetMapping
+    @GetMapping("/my")
     public ResponseEntity<List<Booking>> getTouristsBookings() {
         String userId = SecurityContextHolder.getContext()
                 .getAuthentication().getName();

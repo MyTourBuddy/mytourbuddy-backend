@@ -20,6 +20,10 @@ public class BookingRequest {
     @Positive(message = "Price must be greater than 0")
     private Double totalPrice;
 
+    @NotNull(message = "Total count is required")
+    @Positive(message = "Count must be greater than 0")
+    private Integer totalCount;
+
     @NotNull(message = "Booking date is required")
     private LocalDate bookingDate;
 }

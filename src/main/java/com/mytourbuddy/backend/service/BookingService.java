@@ -67,6 +67,10 @@ public class BookingService {
         return bookingMapper.toResponse(saved);
     }
 
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+
     public List<Booking> getTouristBookings(String touristId) {
         return bookingRepository.findByTouristId(touristId);
     }

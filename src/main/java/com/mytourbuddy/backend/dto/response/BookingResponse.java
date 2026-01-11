@@ -16,6 +16,7 @@ public class BookingResponse {
     private String touristId;
     private String pkgId;
     private Double totalPrice;
+    private Integer totalCount;
     private BookingStatus bookingStatus;
     private Instant createdAt;
 }

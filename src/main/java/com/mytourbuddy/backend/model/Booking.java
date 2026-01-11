@@ -23,6 +23,8 @@ public class Booking {
 
     private Double totalPrice;
 
+    private Integer totalCount;
+
     private BookingStatus bookingStatus;
 
     private LocalDate bookingDate;
