@@ -13,6 +13,7 @@ public class BookingMapper {
         Booking booking = new Booking();
         booking.setPkgId(request.getPkgId());
         booking.setTotalPrice(request.getTotalPrice());
+        booking.setBookingDate(request.getBookingDate());
         booking.setTouristId(touristId);
         return booking;
     }

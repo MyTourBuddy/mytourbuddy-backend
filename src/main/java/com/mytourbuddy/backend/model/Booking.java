@@ -1,6 +1,7 @@
 package com.mytourbuddy.backend.model;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -23,6 +24,8 @@ public class Booking {
     private Double totalPrice;
 
     private BookingStatus bookingStatus;
+
+    private LocalDate bookingDate;
 
     private Instant createdAt;
 }

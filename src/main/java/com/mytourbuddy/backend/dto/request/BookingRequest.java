@@ -1,5 +1,7 @@
 package com.mytourbuddy.backend.dto.request;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,4 +19,7 @@ public class BookingRequest {
     @NotNull(message = "Total price is required")
     @Positive(message = "Price must be greater than 0")
     private Double totalPrice;
+
+    @NotNull(message = "Booking date is required")
+    private LocalDate bookingDate;
 }
