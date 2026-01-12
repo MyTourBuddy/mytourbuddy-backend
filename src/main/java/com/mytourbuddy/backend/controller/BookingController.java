@@ -17,6 +17,7 @@ import com.mytourbuddy.backend.dto.request.BookingRequest;
 import com.mytourbuddy.backend.dto.request.BookingUpdateRequest;
 import com.mytourbuddy.backend.dto.response.BookingResponse;
 import com.mytourbuddy.backend.model.Booking;
+import com.mytourbuddy.backend.security.CustomUserDetails;
 import com.mytourbuddy.backend.service.BookingService;
 
 import jakarta.validation.Valid;
@@ -35,8 +36,9 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
-        String userId = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String userId = userDetails.getUserId();
 
         BookingResponse created = bookingService.createBooking(request, userId);
         return ResponseEntity.ok(created);
@@ -44,17 +46,20 @@ public class BookingController {
 
     @GetMapping("/my")
     public ResponseEntity<List<Booking>> getTouristsBookings() {
-        String userId = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String userId = userDetails.getUserId();
 
+        System.out.println("User ID from auth: " + userId);
         List<Booking> bookings = bookingService.getTouristBookings(userId);
         return ResponseEntity.ok(bookings);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable String id) {
-        String userId = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String userId = userDetails.getUserId();
 
         Booking booking = bookingService.getBookingById(id, userId);
         return ResponseEntity.ok(booking);
@@ -63,8 +68,9 @@ public class BookingController {
     @PutMapping("/{id}")
     public ResponseEntity<BookingResponse> updateBooking(@PathVariable String id,
             @Valid @RequestBody BookingUpdateRequest request) {
-        String guideId = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String guideId = userDetails.getUserId();
 
         BookingResponse updated = bookingService.updateBooking(id, request, guideId);
         return ResponseEntity.ok(updated);
