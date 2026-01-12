@@ -38,7 +38,7 @@ public class BookingService {
     @Autowired
     private IdGenerator idGenerator;
 
-    public BookingResponse createBooking(BookingRequest request, String touristUsername) {
+    public BookingResponse createBooking(BookingRequest request, String userId) {
         Package pkg = packageRepository.findById(request.getPkgId())
                 .orElseThrow(() -> new RuntimeException("Package not found"));
 
@@ -46,11 +46,11 @@ public class BookingService {
             throw new RuntimeException("Package is not available");
         }
 
-        User tourist = userRepository.findByUsername(touristUsername)
+        User tourist = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Booking> existingBookings = bookingRepository.findByTouristIdAndPkgIdAndBookingStatusNot(tourist.getId(),
-                request.getPkgId(), BookingStatus.CANCELLED);
+        List<Booking> existingBookings = bookingRepository.findByTouristIdAndPkgIdAndBookingStatusIn(tourist.getId(),
+                request.getPkgId(), List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED));
 
         if (!existingBookings.isEmpty()) {
             throw new RuntimeException(
@@ -59,6 +59,7 @@ public class BookingService {
 
         Booking booking = bookingMapper.toEntity(request, tourist.getId());
         booking.setId(idGenerator.generate("bkg", bookingRepository::existsById));
+        booking.setGuideId(pkg.getGuideId());
         booking.setBookingStatus(BookingStatus.PENDING);
         booking.setCreatedAt(Instant.now());
 
@@ -73,6 +74,10 @@ public class BookingService {
 
     public List<Booking> getTouristBookings(String touristId) {
         return bookingRepository.findByTouristId(touristId);
+    }
+
+    public List<Booking> getGuideBookings(String guideId) {
+        return bookingRepository.findByGuideId(guideId);
     }
 
     public Booking getBookingById(String bookingId, String touristId) {
@@ -102,6 +107,18 @@ public class BookingService {
             if (!pkg.getGuideId().equals(userId)) {
                 throw new RuntimeException("You can only update bookings for your own packages");
             }
+
+            if (newStatus == BookingStatus.CONFIRMED) {
+                if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                    throw new RuntimeException("Guides can only confirm pending bookings");
+                }
+            } else if (newStatus == BookingStatus.CANCELLED) {
+                if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                    throw new RuntimeException("Guides can only cancel pending bookings");
+                }
+            } else {
+                throw new RuntimeException("Guides can only confirm or cancel pending bookings");
+            }
         } else if (user.getRole() == Role.TOURIST) {
             if (newStatus != BookingStatus.CANCELLED) {
                 throw new RuntimeException("Tourists can only cancel bookings");
@@ -111,8 +128,8 @@ public class BookingService {
                 throw new RuntimeException("You can only cancel your own bookings");
             }
 
-            if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                throw new RuntimeException("You can only cancel pending bookings");
+            if (booking.getBookingStatus() == BookingStatus.COMPLETED) {
+                throw new RuntimeException("You cannot cancel a completed booking");
             }
         }
 

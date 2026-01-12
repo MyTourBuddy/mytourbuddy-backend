@@ -55,6 +55,15 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+    @GetMapping("/guide")
+    public ResponseEntity<List<Booking>> getGuideBookings() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+        String guideId = userDetails.getUserId();
+        List<Booking> bookings = bookingService.getGuideBookings(guideId);
+        return ResponseEntity.ok(bookings);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Booking> getBookingById(@PathVariable String id) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()

@@ -20,6 +20,7 @@ public class Booking {
 
     private String touristId;
     private String pkgId;
+    private String guideId;
 
     private Double totalPrice;
 
