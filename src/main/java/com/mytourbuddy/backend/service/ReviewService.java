@@ -7,7 +7,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mytourbuddy.backend.model.Booking;
+import com.mytourbuddy.backend.model.BookingStatus;
 import com.mytourbuddy.backend.model.Review;
+import com.mytourbuddy.backend.repository.BookingRepository;
 import com.mytourbuddy.backend.repository.ReviewRepository;
 import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.util.IdGenerator;
@@ -24,13 +27,17 @@ public class ReviewService {
     @Autowired
     private IdGenerator idGenerator;
 
+    @Autowired
+    private BookingRepository bookingRepository;
+
     // create review
     public Review createReview(Review review) {
         if (review == null) {
             throw new IllegalArgumentException("Review is required");
         }
 
-        verifyProfilesExist(review);
+        // verifyProfilesExist(review);
+        verifyCompletedBookingExists(review);
         review.setId(idGenerator.generate("rev", reviewRepository::existsById));
         review.setCreatedAt(Instant.now());
         return reviewRepository.save(review);
@@ -48,6 +55,18 @@ public class ReviewService {
             throw new IllegalArgumentException("Tourist with username " + review.getTouristId() + " not found");
         }
 
+        return true;
+    }
+
+    public boolean verifyCompletedBookingExists(Review review) {
+        List<Booking> bookings = bookingRepository.findByTouristIdAndGuideIdAndBookingStatus(
+                review.getTouristId(), review.getGuideId(), BookingStatus.COMPLETED);
+        if (bookings.isEmpty()) {
+            throw new IllegalArgumentException("No completed booking found between guide and tourist");
+        }
+        if (reviewRepository.existsByBookingId(review.getBookingId())) {
+            throw new IllegalArgumentException("Review already exists for this booking");
+        }
         return true;
     }
 

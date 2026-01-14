@@ -112,6 +112,10 @@ public class BookingService {
                 if (booking.getBookingStatus() != BookingStatus.PENDING) {
                     throw new RuntimeException("Guides can only confirm pending bookings");
                 }
+            } else if (newStatus == BookingStatus.COMPLETED) {
+                if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+                    throw new RuntimeException("Guides can only complete confirmed bookings");
+                }
             } else if (newStatus == BookingStatus.CANCELLED) {
                 if (booking.getBookingStatus() != BookingStatus.PENDING) {
                     throw new RuntimeException("Guides can only cancel pending bookings");
@@ -119,6 +123,7 @@ public class BookingService {
             } else {
                 throw new RuntimeException("Guides can only confirm or cancel pending bookings");
             }
+
         } else if (user.getRole() == Role.TOURIST) {
             if (newStatus != BookingStatus.CANCELLED) {
                 throw new RuntimeException("Tourists can only cancel bookings");

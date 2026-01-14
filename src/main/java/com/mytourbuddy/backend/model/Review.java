@@ -28,6 +28,9 @@ public class Review {
     @NotBlank(message = "Tourist ID is required")
     private String touristId;
 
+    @NotBlank(message = "Booking ID is required")
+    private String bookingId;
+
     @NotBlank(message = "Message cannot be empty")
     private String message;
 
