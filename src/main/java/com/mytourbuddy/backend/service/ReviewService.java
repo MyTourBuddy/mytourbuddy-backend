@@ -12,7 +12,6 @@ import com.mytourbuddy.backend.model.BookingStatus;
 import com.mytourbuddy.backend.model.Review;
 import com.mytourbuddy.backend.repository.BookingRepository;
 import com.mytourbuddy.backend.repository.ReviewRepository;
-import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.util.IdGenerator;
 
 @Service
@@ -20,9 +19,6 @@ public class ReviewService {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private IdGenerator idGenerator;
@@ -36,38 +32,25 @@ public class ReviewService {
             throw new IllegalArgumentException("Review is required");
         }
 
-        // verifyProfilesExist(review);
-        verifyCompletedBookingExists(review);
+        Booking booking = verifyCompletedBookingExists(review);
         review.setId(idGenerator.generate("rev", reviewRepository::existsById));
         review.setCreatedAt(Instant.now());
-        return reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(review);
+        booking.setIsReviewed(true);
+        bookingRepository.save(booking);
+        return savedReview;
     }
 
-    public boolean verifyProfilesExist(Review review) {
-        boolean guideExists = userRepository.existsById(review.getGuideId());
-        boolean touristExists = userRepository.existsById(review.getTouristId());
-
-        if (!guideExists) {
-            throw new IllegalArgumentException("Guide with username " + review.getGuideId() + " not found");
+    public Booking verifyCompletedBookingExists(Review review) {
+        Booking booking = bookingRepository.findById(review.getBookingId())
+            .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        if (booking.getBookingStatus() != BookingStatus.COMPLETED) {
+            throw new IllegalArgumentException("Booking is not completed");
         }
-
-        if (!touristExists) {
-            throw new IllegalArgumentException("Tourist with username " + review.getTouristId() + " not found");
-        }
-
-        return true;
-    }
-
-    public boolean verifyCompletedBookingExists(Review review) {
-        List<Booking> bookings = bookingRepository.findByTouristIdAndGuideIdAndBookingStatus(
-                review.getTouristId(), review.getGuideId(), BookingStatus.COMPLETED);
-        if (bookings.isEmpty()) {
-            throw new IllegalArgumentException("No completed booking found between guide and tourist");
-        }
-        if (reviewRepository.existsByBookingId(review.getBookingId())) {
+        if (booking.getIsReviewed() != null && booking.getIsReviewed()) {
             throw new IllegalArgumentException("Review already exists for this booking");
         }
-        return true;
+        return booking;
     }
 
     // get all reveiws

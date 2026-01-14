@@ -31,4 +31,6 @@ public class Booking {
     private LocalDate bookingDate;
 
     private Instant createdAt;
+
+    private Boolean isReviewed = false;
 }
