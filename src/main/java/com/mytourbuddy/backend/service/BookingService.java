@@ -108,17 +108,27 @@ public class BookingService {
                 throw new RuntimeException("You can only update bookings for your own packages");
             }
 
-            if (newStatus == BookingStatus.CONFIRMED) {
-                if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                    throw new RuntimeException("Guides can only confirm pending bookings");
-                }
-            } else if (newStatus == BookingStatus.CANCELLED) {
-                if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                    throw new RuntimeException("Guides can only cancel pending bookings");
-                }
-            } else {
+            if (null == newStatus) {
                 throw new RuntimeException("Guides can only confirm or cancel pending bookings");
+            } else switch (newStatus) {
+                case CONFIRMED -> {
+                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                        throw new RuntimeException("Guides can only confirm pending bookings");
+                    }
+                }
+                case COMPLETED -> {
+                    if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+                        throw new RuntimeException("Guides can only complete confirmed bookings");
+                    }
+                }
+                case CANCELLED -> {
+                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                        throw new RuntimeException("Guides can only cancel pending bookings");
+                    }
+                }
+                default -> throw new RuntimeException("Guides can only confirm or cancel pending bookings");
             }
+
         } else if (user.getRole() == Role.TOURIST) {
             if (newStatus != BookingStatus.CANCELLED) {
                 throw new RuntimeException("Tourists can only cancel bookings");
