@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/bookings/**").permitAll()
+                        // .requestMatchers("/api/v1/bookings/**").permitAll()
 
                         // users
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
@@ -68,10 +68,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/**").hasRole("TOURIST")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").hasAnyRole("TOURIST", "ADMIN")
 
+                        // bookings
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/my").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/guide").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/bookings").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").authenticated()
+                        .requestMatchers("/api/v1/bookings/**").authenticated()
+
                         // tickets
                         .requestMatchers(HttpMethod.GET, "/api/v1/tickets/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/tickets").hasAnyRole("TOURIST", "GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/tickets/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/tickets/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

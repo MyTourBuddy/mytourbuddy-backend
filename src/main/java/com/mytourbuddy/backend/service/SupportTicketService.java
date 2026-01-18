@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -59,23 +58,17 @@ public class SupportTicketService {
                 .collect(Collectors.toList());
     }
 
+    // get ticket by id
     public SupportTicketResponse getTicketById(String ticketId) {
-        String currentUserId = getCurrentUserId();
-
         Optional<SupportTicket> ticketOpt = supportTicketRepository.findById(ticketId);
-
         if (ticketOpt.isEmpty()) {
             throw new IllegalArgumentException("Ticket not found");
         }
-
         SupportTicket ticket = ticketOpt.get();
-        if (!ticket.getUserId().equals(currentUserId)) {
-            throw new AccessDeniedException("Access denied");
-        }
-
         return supportTicketMapper.toResponse(ticket);
     }
 
+    // close ticket (just update status)
     public SupportTicketResponse closeTicket(String ticketId, CloseTicketRequest request) {
         SupportTicket ticket = supportTicketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found"));
