@@ -33,8 +33,10 @@ public class ReviewService {
         }
 
         Booking booking = verifyCompletedBookingExists(review);
+
         review.setId(idGenerator.generate("rev", reviewRepository::existsById));
         review.setCreatedAt(Instant.now());
+        
         Review savedReview = reviewRepository.save(review);
         booking.setIsReviewed(true);
         bookingRepository.save(booking);
