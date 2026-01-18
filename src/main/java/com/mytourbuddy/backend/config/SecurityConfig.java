@@ -48,13 +48,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/packages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/experiences/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
 
                         // admin only
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
 
-                        // guide only for package management
                         // packages
                         .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**").hasRole("GUIDE")
@@ -71,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").hasAnyRole("TOURIST", "ADMIN")
 
                         // buddy-ai
-                        // .requestMatchers(HttpMethod.POST, "/api/v1/buddy-ai").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/buddy-ai").hasRole("TOURIST")
 
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
