@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookings/guide").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.POST, "/api/v1/bookings").hasRole("TOURIST")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/**").authenticated()
                         .requestMatchers("/api/v1/bookings/**").authenticated()
 
                         // tickets

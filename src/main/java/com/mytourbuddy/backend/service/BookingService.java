@@ -80,14 +80,10 @@ public class BookingService {
         return bookingRepository.findByGuideId(guideId);
     }
 
-    public Booking getBookingById(String bookingId, String touristId) {
+    public Booking getBookingById(String bookingId, String userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        // tourists only can see their bookings
-        if (!booking.getTouristId().equals(touristId)) {
-            throw new RuntimeException("Unauthorized access");
-        }
         return booking;
     }
 
@@ -110,24 +106,25 @@ public class BookingService {
 
             if (null == newStatus) {
                 throw new RuntimeException("Guides can only confirm or cancel pending bookings");
-            } else switch (newStatus) {
-                case CONFIRMED -> {
-                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                        throw new RuntimeException("Guides can only confirm pending bookings");
+            } else
+                switch (newStatus) {
+                    case CONFIRMED -> {
+                        if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                            throw new RuntimeException("Guides can only confirm pending bookings");
+                        }
                     }
-                }
-                case COMPLETED -> {
-                    if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
-                        throw new RuntimeException("Guides can only complete confirmed bookings");
+                    case COMPLETED -> {
+                        if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+                            throw new RuntimeException("Guides can only complete confirmed bookings");
+                        }
                     }
-                }
-                case CANCELLED -> {
-                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                        throw new RuntimeException("Guides can only cancel pending bookings");
+                    case CANCELLED -> {
+                        if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                            throw new RuntimeException("Guides can only cancel pending bookings");
+                        }
                     }
+                    default -> throw new RuntimeException("Guides can only confirm or cancel pending bookings");
                 }
-                default -> throw new RuntimeException("Guides can only confirm or cancel pending bookings");
-            }
 
         } else if (user.getRole() == Role.TOURIST) {
             if (newStatus != BookingStatus.CANCELLED) {
