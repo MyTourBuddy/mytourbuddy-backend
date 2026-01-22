@@ -19,6 +19,7 @@ import com.mytourbuddy.backend.dto.request.LoginRequest;
 import com.mytourbuddy.backend.dto.request.RegisterRequest;
 import com.mytourbuddy.backend.dto.response.AuthResponse;
 import com.mytourbuddy.backend.dto.response.UserResponse;
+import com.mytourbuddy.backend.model.Role;
 import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.service.AuthService;
 
@@ -75,6 +76,29 @@ public class AuthController {
 
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("user", authResponse.getUser());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<Map<String, Object>> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+        if (request.getRole() != Role.ADMIN) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "This endpoint is only for registering admin accounts");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
+        try {
+            UserResponse userResponse = authService.registerAdmin(request);
+
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("user", userResponse);
+            responseBody.put("message", "Admin account created successfully");
 
             return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
         } catch (IllegalArgumentException e) {
