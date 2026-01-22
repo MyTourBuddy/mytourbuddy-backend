@@ -121,6 +121,7 @@ public class AuthService {
                         throw new IllegalArgumentException("Email already exists");
                 }
                 User user = userMapper.toEntity(request);
+                user.setRole(Role.ADMIN);
 
                 user.setPassword(passwordEncoder.encode(request.getPassword()));
 

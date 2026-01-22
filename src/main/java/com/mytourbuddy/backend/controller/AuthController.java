@@ -19,7 +19,6 @@ import com.mytourbuddy.backend.dto.request.LoginRequest;
 import com.mytourbuddy.backend.dto.request.RegisterRequest;
 import com.mytourbuddy.backend.dto.response.AuthResponse;
 import com.mytourbuddy.backend.dto.response.UserResponse;
-import com.mytourbuddy.backend.model.Role;
 import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.service.AuthService;
 
@@ -68,44 +67,25 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request,
             HttpServletResponse response) {
-        try {
-            AuthResponse authResponse = authService.register(request);
+        AuthResponse authResponse = authService.register(request);
 
-            Cookie jwtCookie = createJwtCookie(authResponse.getToken());
-            response.addCookie(jwtCookie);
+        Cookie jwtCookie = createJwtCookie(authResponse.getToken());
+        response.addCookie(jwtCookie);
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("user", authResponse.getUser());
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("user", authResponse.getUser());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     }
 
     @PostMapping("/register-admin")
     public ResponseEntity<Map<String, Object>> registerAdmin(@Valid @RequestBody RegisterRequest request) {
-        if (request.getRole() != Role.ADMIN) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "This endpoint is only for registering admin accounts");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+        authService.registerAdmin(request);
 
-        try {
-            UserResponse userResponse = authService.registerAdmin(request);
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Admin account created successfully");
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("user", userResponse);
-            responseBody.put("message", "Admin account created successfully");
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     }
 
     // login user
