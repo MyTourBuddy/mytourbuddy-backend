@@ -67,21 +67,25 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request,
             HttpServletResponse response) {
-        try {
-            AuthResponse authResponse = authService.register(request);
+        AuthResponse authResponse = authService.register(request);
 
-            Cookie jwtCookie = createJwtCookie(authResponse.getToken());
-            response.addCookie(jwtCookie);
+        Cookie jwtCookie = createJwtCookie(authResponse.getToken());
+        response.addCookie(jwtCookie);
 
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("user", authResponse.getUser());
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("user", authResponse.getUser());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
-        } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
+    }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<Map<String, Object>> registerAdmin(@Valid @RequestBody RegisterRequest request) {
+        authService.registerAdmin(request);
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("message", "Admin account created successfully");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseBody);
     }
 
     // login user

@@ -65,6 +65,11 @@ public class AuthService {
 
         // register user
         public AuthResponse register(RegisterRequest request) {
+                if (request.getRole() == Role.ADMIN) {
+                        throw new IllegalArgumentException(
+                                        "Admin registration requires admin privileges. Use /register-admin endpoint.");
+                }
+
                 if (userRepository.existsByUsername(request.getUsername())) {
                         throw new IllegalArgumentException("Username already exists");
                 }
@@ -104,6 +109,28 @@ public class AuthService {
                 String token = jwtUtil.generateToken(userDetails);
 
                 return new AuthResponse(token, userResponse);
+        }
+
+        // register admin
+        public UserResponse registerAdmin(RegisterRequest request) {
+                if (userRepository.existsByUsername(request.getUsername())) {
+                        throw new IllegalArgumentException("Username already exists");
+                }
+
+                if (userRepository.existsByEmail(request.getEmail())) {
+                        throw new IllegalArgumentException("Email already exists");
+                }
+                User user = userMapper.toEntity(request);
+                user.setRole(Role.ADMIN);
+
+                user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+                user.setIsProfileComplete(true);
+                user.setMemberSince(Instant.now());
+
+                User savedUser = userRepository.save(user);
+
+                return userMapper.toResponse(savedUser);
         }
 
         public UserResponse getUserFromToken(String token) {

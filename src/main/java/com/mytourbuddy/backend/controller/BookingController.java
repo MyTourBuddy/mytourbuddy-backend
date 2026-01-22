@@ -50,7 +50,6 @@ public class BookingController {
                 .getAuthentication().getPrincipal();
         String userId = userDetails.getUserId();
 
-        System.out.println("User ID from auth: " + userId);
         List<Booking> bookings = bookingService.getTouristBookings(userId);
         return ResponseEntity.ok(bookings);
     }

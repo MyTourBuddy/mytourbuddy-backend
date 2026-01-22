@@ -42,35 +42,47 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/bookings/**").permitAll()
-                        .requestMatchers("/api/v1/buddy-ai/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/experiences/**").permitAll()
+                        // auth
+                        .requestMatchers("/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/register-admin").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/auth/login").permitAll()
 
-                        // admin only
+                        // users
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
 
                         // packages
+                        .requestMatchers(HttpMethod.GET, "/api/v1/packages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/packages").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/packages/**").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/packages/**").hasAnyRole("GUIDE", "ADMIN")
 
                         // experiences
+                        .requestMatchers(HttpMethod.GET, "/api/v1/experiences/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/experiences").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/experiences/**").hasRole("GUIDE")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/experiences/**").hasAnyRole("GUIDE", "ADMIN")
 
                         // reviews
+                        .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/reviews").hasRole("TOURIST")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/**").hasRole("TOURIST")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").hasAnyRole("TOURIST", "ADMIN")
 
-                        // buddy-ai
-                        .requestMatchers(HttpMethod.POST, "/api/v1/buddy-ai").hasRole("TOURIST")
+                        // bookings
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/my").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/guide").hasRole("GUIDE")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/bookings").hasRole("TOURIST")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/bookings/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/**").authenticated()
+                        .requestMatchers("/api/v1/bookings/**").authenticated()
 
+                        // tickets
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tickets/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/tickets").hasAnyRole("TOURIST", "GUIDE")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/tickets/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/tickets/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
