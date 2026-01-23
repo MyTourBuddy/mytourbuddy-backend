@@ -36,6 +36,7 @@ public class PackageMapper {
         PackageResponse response = new PackageResponse();
 
         response.setId(pkg.getId());
+        response.setGuideId(pkg.getGuideId());
         response.setTitle(pkg.getTitle());
         response.setDescription(pkg.getDescription());
         response.setPrice(pkg.getPrice());

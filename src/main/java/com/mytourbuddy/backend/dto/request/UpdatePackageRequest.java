@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.mytourbuddy.backend.model.PackageStatus;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +20,8 @@ public class UpdatePackageRequest {
     @Positive(message = "Price must be positive")
     private Double price;
 
-    private String duration;
+    @Min(value = 1, message = "Duration must be at least 1")
+    private Integer duration;
     private String location;
     private String image;
 

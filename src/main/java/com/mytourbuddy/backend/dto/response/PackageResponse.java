@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PackageResponse {
     private String id;
+    private String guideId;
     private String title;
     private String description;
     private Double price;
-    private String duration;
+    private Integer duration;
     private String location;
     private String image;
     private Integer maxGroupSize;
