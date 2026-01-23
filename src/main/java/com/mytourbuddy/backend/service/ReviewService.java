@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mytourbuddy.backend.dto.request.CreateReviewRequest;
+import com.mytourbuddy.backend.dto.request.UpdateReviewRequest;
 import com.mytourbuddy.backend.model.Booking;
 import com.mytourbuddy.backend.model.BookingStatus;
 import com.mytourbuddy.backend.model.Review;
@@ -27,16 +29,31 @@ public class ReviewService {
     private BookingRepository bookingRepository;
 
     // create review
-    public Review createReview(Review review) {
-        if (review == null) {
-            throw new IllegalArgumentException("Review is required");
+    public Review createReview(CreateReviewRequest request, String touristId) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request is required");
         }
 
-        Booking booking = verifyCompletedBookingExists(review);
+        Booking booking = bookingRepository.findById(request.getBookingId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
+        if (!booking.getTouristId().equals(touristId)) {
+            throw new IllegalArgumentException("Unauthorized: Booking does not belong to user");
+        }
+
+        if (booking.getBookingStatus() != BookingStatus.COMPLETED) {
+            throw new IllegalArgumentException("Booking is not completed");
+        }
+
+        Review review = new Review();
         review.setId(idGenerator.generate("rev", reviewRepository::existsById));
+        review.setBookingId(request.getBookingId());
+        review.setTouristId(touristId);
+        review.setGuideId(booking.getGuideId());
+        review.setMessage(request.getMessage());
+        review.setRating(request.getRating());
         review.setCreatedAt(Instant.now());
-        
+
         Review savedReview = reviewRepository.save(review);
         booking.setIsReviewed(true);
         bookingRepository.save(booking);
@@ -45,7 +62,7 @@ public class ReviewService {
 
     public Booking verifyCompletedBookingExists(Review review) {
         Booking booking = bookingRepository.findById(review.getBookingId())
-            .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
         if (booking.getBookingStatus() != BookingStatus.COMPLETED) {
             throw new IllegalArgumentException("Booking is not completed");
         }
@@ -76,27 +93,33 @@ public class ReviewService {
     }
 
     // update review
-    public Review updateReview(String id, Review updatedReview) {
-
+    public Review updateReview(String id, UpdateReviewRequest request, String touristId) {
         Review existingReview = reviewRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Review not found"));
 
-        Optional.ofNullable(updatedReview.getMessage())
-                .filter(msg -> !msg.isEmpty())
+        if (!existingReview.getTouristId().equals(touristId)) {
+            throw new IllegalArgumentException("Unauthorized: You can only update your own reviews");
+        }
+
+        Optional.ofNullable(request.getMessage())
+                .filter(msg -> !msg.trim().isEmpty())
                 .ifPresent(existingReview::setMessage);
 
-        Optional.ofNullable(updatedReview.getRating())
-                .filter(rating -> rating >= 1 && rating <= 5)
+        Optional.ofNullable(request.getRating())
                 .ifPresent(existingReview::setRating);
 
         return reviewRepository.save(existingReview);
     }
 
     // delete review
-    public void deleteReview(String id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new IllegalArgumentException("Review not found");
+    public void deleteReview(String id, String touristId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+
+        if (touristId != null && !review.getTouristId().equals(touristId)) {
+            throw new IllegalArgumentException("Unauthorized: You can only delete your own reviews");
         }
+
         reviewRepository.deleteById(id);
     }
 }

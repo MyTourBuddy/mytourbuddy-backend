@@ -22,7 +22,8 @@ public class BuddyAiService {
         try {
             String prompt = "Generate a tourist guide for " + request.getFirstName() + " " + request.getLastName() +
                     ", age " + request.getAge() + ", preferences: " + request.getTravelPrefs() +
-                    ", from " + request.getStartLocation() + " to " + request.getEndDestination() + " around 50 words without thinking.";
+                    ", from " + request.getStartLocation() + " to " + request.getEndDestination()
+                    + " around 50 words without thinking.";
 
             GenerateContentResponse response = client.models.generateContent("gemini-2.5-flash", prompt, null);
             String guide = response.text();

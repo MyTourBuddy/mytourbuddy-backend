@@ -54,7 +54,7 @@ public class SupportTicketContoller {
     }
 
     // close ticket (for admins)
-    @PutMapping("/{id}/close")
+    @PutMapping("/{id}")
     public ResponseEntity<SupportTicketResponse> closeTicket(@PathVariable String id,
             @Valid @RequestBody CloseTicketRequest request) {
         SupportTicketResponse response = supportTicketService.closeTicket(id, request);
