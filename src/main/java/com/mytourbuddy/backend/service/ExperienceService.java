@@ -86,10 +86,14 @@ public class ExperienceService {
     }
 
     // delete experience
-    public void deleteExperience(String id) {
-        if (!repository.existsById(id)) {
-            throw new IllegalArgumentException("Experience not found");
+    public void deleteExperience(String id, String userId) {
+        Experience experience = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Experience not found"));
+
+        if (userId != null && !experience.getGuideId().equals(userId)) {
+            throw new SecurityException("You can only delete your own experiences");
         }
+
         repository.deleteById(id);
     }
 }

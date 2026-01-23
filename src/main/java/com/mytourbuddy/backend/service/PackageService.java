@@ -96,7 +96,7 @@ public class PackageService {
         Package existingPkg = packageRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Package not found"));
 
-        if (!existingPkg.getGuideId().equals(userId)) {
+        if (userId != null && !existingPkg.getGuideId().equals(userId)) {
             throw new SecurityException("You can only delete your own packages");
         }
 
