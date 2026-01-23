@@ -71,8 +71,15 @@ public class ExperienceController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExperience(@PathVariable String id) {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        String userId = userDetails.getUserId();
+
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
         try {
-            service.deleteExperience(id);
+            service.deleteExperience(id, isAdmin ? null : userId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
