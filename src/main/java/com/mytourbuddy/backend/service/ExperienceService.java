@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mytourbuddy.backend.dto.request.CreateExperienceRequest;
 import com.mytourbuddy.backend.model.Experience;
 import com.mytourbuddy.backend.repository.ExperienceRepository;
 import com.mytourbuddy.backend.repository.UserRepository;
@@ -40,19 +41,25 @@ public class ExperienceService {
     }
 
     // create experience
-    public Experience createExperience(Experience experience) {
-        if (experience == null) {
-            throw new IllegalArgumentException("Experience is required");
+    public Experience createExperience(CreateExperienceRequest request, String guideId) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request is required");
         }
 
-        boolean guideExists = userRepository.existsById(experience.getGuideId());
-
+        boolean guideExists = userRepository.existsById(guideId);
         if (!guideExists) {
-            throw new IllegalArgumentException("Guide with id " + experience.getGuideId() + " not found");
+            throw new IllegalArgumentException("Guide not found");
         }
 
+        Experience experience = new Experience();
+        experience.setGuideId(guideId);
+        experience.setTitle(request.getTitle());
+        experience.setDescription(request.getDescription());
+        experience.setImage(request.getImage());
+        experience.setExperiencedAt(request.getExperiencedAt());
         experience.setId(idGenerator.generate("exp", repository::existsById));
         experience.setCreatedAt(Instant.now());
+
         return repository.save(experience);
     }
 

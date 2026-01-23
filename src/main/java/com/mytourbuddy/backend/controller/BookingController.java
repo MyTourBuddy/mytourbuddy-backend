@@ -3,6 +3,7 @@ package com.mytourbuddy.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +42,7 @@ public class BookingController {
         String userId = userDetails.getUserId();
 
         BookingResponse created = bookingService.createBooking(request, userId);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/my")

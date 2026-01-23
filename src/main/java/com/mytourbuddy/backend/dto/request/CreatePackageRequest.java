@@ -1,10 +1,6 @@
-package com.mytourbuddy.backend.model;
+package com.mytourbuddy.backend.dto.request;
 
-import java.time.Instant;
 import java.util.List;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -18,14 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "packages")
-public class Package {
-    @Id
-    private String id;
-
-    @NotBlank(message = "Guide ID is required")
-    private String guideId;
-
+public class CreatePackageRequest {
     @NotBlank(message = "Title is required")
     private String title;
 
@@ -43,7 +32,11 @@ public class Package {
     @NotBlank(message = "Location is required")
     private String location;
 
+    @NotBlank(message = "Image is required")
     private String image;
+
+    @NotNull(message = "Group size is required")
+    @Positive(message = "Group size must be positive")
     private Integer maxGroupSize;
 
     @NotEmpty(message = "Included items are required")
@@ -51,6 +44,4 @@ public class Package {
 
     private List<String> notIncluded;
     private String note;
-    private PackageStatus status;
-    private Instant createdAt;
 }

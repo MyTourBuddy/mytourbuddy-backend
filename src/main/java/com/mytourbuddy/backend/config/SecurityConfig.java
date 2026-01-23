@@ -44,12 +44,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // auth
                         .requestMatchers("/api/v1/auth/register").permitAll()
-                        .requestMatchers("/api/v1/auth/register-admin").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/auth/register-admin").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/health").permitAll()
+                        .requestMatchers("/api/v1/auth/check-username").permitAll()
+                        .requestMatchers("/api/v1/auth/check-email").permitAll()
+                        .requestMatchers("/api/v1/auth/me").authenticated()
+                        .requestMatchers("/api/v1/auth/logout").authenticated()
+                        .requestMatchers("/").permitAll()
 
                         // users
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
 
                         // packages
@@ -79,7 +86,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/bookings/**").authenticated()
 
                         // tickets
-                        .requestMatchers(HttpMethod.GET, "/api/v1/tickets/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/tickets/all").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/tickets").hasAnyRole("TOURIST", "GUIDE")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/tickets/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/tickets/**").authenticated()

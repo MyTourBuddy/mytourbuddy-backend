@@ -104,27 +104,28 @@ public class BookingService {
                 throw new RuntimeException("You can only update bookings for your own packages");
             }
 
-            if (null == newStatus) {
-                throw new RuntimeException("Guides can only confirm or cancel pending bookings");
-            } else
-                switch (newStatus) {
-                    case CONFIRMED -> {
-                        if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                            throw new RuntimeException("Guides can only confirm pending bookings");
-                        }
+            if (newStatus == null) {
+                throw new RuntimeException("Booking status is required");
+            }
+
+            switch (newStatus) {
+                case CONFIRMED -> {
+                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                        throw new RuntimeException("Guides can only confirm pending bookings");
                     }
-                    case COMPLETED -> {
-                        if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
-                            throw new RuntimeException("Guides can only complete confirmed bookings");
-                        }
-                    }
-                    case CANCELLED -> {
-                        if (booking.getBookingStatus() != BookingStatus.PENDING) {
-                            throw new RuntimeException("Guides can only cancel pending bookings");
-                        }
-                    }
-                    default -> throw new RuntimeException("Guides can only confirm or cancel pending bookings");
                 }
+                case COMPLETED -> {
+                    if (booking.getBookingStatus() != BookingStatus.CONFIRMED) {
+                        throw new RuntimeException("Guides can only complete confirmed bookings");
+                    }
+                }
+                case CANCELLED -> {
+                    if (booking.getBookingStatus() != BookingStatus.PENDING) {
+                        throw new RuntimeException("Guides can only cancel pending bookings");
+                    }
+                }
+                default -> throw new RuntimeException("Invalid booking status for guides");
+            }
 
         } else if (user.getRole() == Role.TOURIST) {
             if (newStatus != BookingStatus.CANCELLED) {
