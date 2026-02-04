@@ -42,6 +42,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // actuator endpoints (for monitoring)
+                        .requestMatchers("/actuator/**").permitAll()
+
                         // auth
                         .requestMatchers("/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/auth/register-admin").permitAll()

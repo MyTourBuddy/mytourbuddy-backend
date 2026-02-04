@@ -11,9 +11,9 @@
     </parent>
     <groupId>com.mytourbuddy</groupId>
     <artifactId>backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>backend</name>
-    <description>Demo project for Spring Boot</description>
+    <version>1.0.0</version>
+    <name>MyTourBuddy Backend</name>
+    <description>MyTourBuddy - Personal Tour Buddy Platform Backend</description>
     <url/>
     <licenses>
         <license/>
@@ -92,6 +92,12 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- For production monitoring -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -109,6 +115,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
