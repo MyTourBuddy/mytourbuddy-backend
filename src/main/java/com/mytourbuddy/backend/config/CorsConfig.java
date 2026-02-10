@@ -33,8 +33,8 @@ public class CorsConfig {
         config.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Expose headers (if needed)
-        // config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
+        // Expose headers for cross-origin cookie handling
+        config.setExposedHeaders(Arrays.asList("Set-Cookie"));
 
         // Max age for preflight requests
         config.setMaxAge(3600L);

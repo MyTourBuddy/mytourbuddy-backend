@@ -1,11 +1,13 @@
 package com.mytourbuddy.backend.controller;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +24,6 @@ import com.mytourbuddy.backend.dto.response.UserResponse;
 import com.mytourbuddy.backend.repository.UserRepository;
 import com.mytourbuddy.backend.service.AuthService;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -39,28 +40,27 @@ public class AuthController {
     @Value("${jwt.cookie.max-age}")
     private int cookieMaxAge;
 
-    @Value("${jwt.cookie.secure}")
-    private boolean cookieSecure;
-
     @Autowired
     private UserRepository userRepository;
 
-    private Cookie createJwtCookie(String token) {
-        Cookie cookie = new Cookie(cookieName, token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(cookieMaxAge);
-        return cookie;
+    private ResponseCookie createJwtCookie(String token) {
+        return ResponseCookie.from(cookieName, token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofSeconds(cookieMaxAge))
+                .sameSite("None")
+                .build();
     }
 
-    private Cookie clearJwtCookie() {
-        Cookie cookie = new Cookie(cookieName, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(cookieSecure);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        return cookie;
+    private ResponseCookie clearJwtCookie() {
+        return ResponseCookie.from(cookieName, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
     }
 
     // register user
@@ -69,8 +69,8 @@ public class AuthController {
             HttpServletResponse response) {
         AuthResponse authResponse = authService.register(request);
 
-        Cookie jwtCookie = createJwtCookie(authResponse.getToken());
-        response.addCookie(jwtCookie);
+        ResponseCookie jwtCookie = createJwtCookie(authResponse.getToken());
+        response.addHeader("Set-Cookie", jwtCookie.toString());
 
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("user", authResponse.getUser());
@@ -94,8 +94,8 @@ public class AuthController {
             HttpServletResponse response) {
         AuthResponse authResponse = authService.login(request);
 
-        Cookie jwtCookie = createJwtCookie(authResponse.getToken());
-        response.addCookie(jwtCookie);
+        ResponseCookie jwtCookie = createJwtCookie(authResponse.getToken());
+        response.addHeader("Set-Cookie", jwtCookie.toString());
 
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("user", authResponse.getUser());
@@ -125,8 +125,8 @@ public class AuthController {
     // logout
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletResponse response) {
-        Cookie jwtCookie = clearJwtCookie();
-        response.addCookie(jwtCookie);
+        ResponseCookie jwtCookie = clearJwtCookie();
+        response.addHeader("Set-Cookie", jwtCookie.toString());
 
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("message", "Logged out successfully");
