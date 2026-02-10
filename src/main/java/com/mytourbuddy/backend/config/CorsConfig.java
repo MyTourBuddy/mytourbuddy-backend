@@ -1,5 +1,6 @@
 package com.mytourbuddy.backend.config;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,24 +21,27 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // CRITICAL: Allow credentials for cookies
+        // Allow cookies to be sent with cross-origin requests
         config.setAllowCredentials(true);
 
-        // Set allowed origins (cannot use "*" with credentials)
+        // Set allowed frontend origins (from application.properties)
         config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
 
-        // Allow all headers
+        // Allow all request headers
         config.setAllowedHeaders(Arrays.asList("*"));
 
-        // Allow specific methods
-        config.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Specify which HTTP methods are permitted
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Expose headers for cross-origin cookie handling
-        config.setExposedHeaders(Arrays.asList("Set-Cookie"));
+        // Expose these headers to the frontend
+        config.setExposedHeaders(Arrays.asList(
+                "Set-Cookie",
+                "Authorization",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"));
 
-        // Max age for preflight requests
-        config.setMaxAge(3600L);
+        // Cache preflight requests for 3 days
+        config.setMaxAge(Duration.ofDays(3));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

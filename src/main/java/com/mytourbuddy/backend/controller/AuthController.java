@@ -37,9 +37,6 @@ public class AuthController {
     @Value("${jwt.cookie.name}")
     private String cookieName;
 
-    @Value("${jwt.cookie.max-age}")
-    private int cookieMaxAge;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -48,7 +45,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(Duration.ofSeconds(cookieMaxAge))
+                .maxAge(Duration.ofDays(3))
                 .sameSite("None")
                 .build();
     }
